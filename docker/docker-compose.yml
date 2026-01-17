@@ -1,0 +1,59 @@
+# Cyrus Docker Compose Configuration
+#
+# This file orchestrates the Cyrus container with proper volumes and networking.
+#
+# Usage:
+#   1. Copy .env.docker.example to .env.docker and fill in credentials
+#   2. Start ngrok on your host: ngrok http 3456
+#   3. Add CYRUS_BASE_URL to .env.docker with your ngrok URL
+#   4. Run: docker-compose up -d
+#
+# See docs/DOCKER.md for detailed setup instructions.
+
+services:
+  cyrus:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cyrus-ai/cyrus:latest
+    container_name: cyrus
+
+    # Port mapping: host:container
+    ports:
+      - "${CYRUS_SERVER_PORT:-3456}:3456"
+
+    # Environment configuration
+    env_file:
+      - .env.docker
+
+    # Volume mounts
+    volumes:
+      # Cyrus data directory (config, state, logs, repos)
+      - ${CYRUS_HOME:-~/.cyrus}:/root/.cyrus:rw
+
+      # SSH keys for git operations (read-only for security)
+      - ~/.ssh:/root/.ssh:ro
+
+      # Note: Git config is set via GIT_USER_NAME and GIT_USER_EMAIL env vars
+      # instead of mounting ~/.gitconfig (which conflicts with entrypoint writes)
+
+      # Uncomment to mount local repositories:
+      # - /path/to/local/repo:/workspace/repo-name:rw
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

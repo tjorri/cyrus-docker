@@ -1,0 +1,73 @@
+{
+	"name": "cyrus-docker",
+	"version": "0.1.0",
+	"description": "CLI tool for managing Docker-based Cyrus deployments with automatic tunnel management",
+	"main": "dist/app.js",
+	"types": "dist/app.d.ts",
+	"bin": {
+		"cyrus-docker": "./dist/app.js"
+	},
+	"type": "module",
+	"scripts": {
+		"build": "tsc",
+		"start": "node dist/app.js",
+		"dev": "tsc --watch",
+		"test": "vitest run",
+		"test:run": "vitest run --passWithNoTests",
+		"test:watch": "vitest",
+		"typecheck": "tsc --noEmit",
+		"prepublishOnly": "npm run build"
+	},
+	"files": [
+		"dist",
+		"docker",
+		"README.md"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tjorri/cyrus-docker.git"
+	},
+	"keywords": [
+		"cyrus",
+		"docker",
+		"ngrok",
+		"linear",
+		"claude",
+		"ai",
+		"automation",
+		"cli"
+	],
+	"author": "",
+	"license": "Apache-2.0",
+	"dependencies": {
+		"commander": "^14.0.2",
+		"execa": "^9.6.0",
+		"inquirer": "^12.6.2",
+		"yaml": "^2.7.0"
+	},
+	"devDependencies": {
+		"@semantic-release/changelog": "^6.0.3",
+		"@semantic-release/git": "^10.0.1",
+		"@types/node": "^20.0.0",
+		"semantic-release": "^24.2.0",
+		"typescript": "^5.3.3",
+		"vitest": "^3.1.4"
+	},
+	"release": {
+		"branches": ["main"],
+		"plugins": [
+			"@semantic-release/commit-analyzer",
+			"@semantic-release/release-notes-generator",
+			"@semantic-release/changelog",
+			"@semantic-release/npm",
+			"@semantic-release/github",
+			["@semantic-release/git", {
+				"assets": ["package.json", "CHANGELOG.md"],
+				"message": "chore(release): ${nextRelease.version} [skip ci]"
+			}]
+		]
+	}
+}
