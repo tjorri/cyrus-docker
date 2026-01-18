@@ -51,25 +51,37 @@
 	"devDependencies": {
 		"@semantic-release/changelog": "^6.0.3",
 		"@semantic-release/git": "^10.0.1",
+		"@semantic-release/npm": "^13.1.3",
 		"@types/node": "^20.0.0",
 		"semantic-release": "^24.2.0",
 		"typescript": "^5.3.3",
 		"vitest": "^3.1.4"
 	},
 	"release": {
-		"branches": ["main"],
+		"branches": [
+			"main"
+		],
 		"plugins": [
 			"@semantic-release/commit-analyzer",
 			"@semantic-release/release-notes-generator",
 			"@semantic-release/changelog",
-			["@semantic-release/npm", {
-				"provenance": true
-			}],
+			[
+				"@semantic-release/npm",
+				{
+					"provenance": true
+				}
+			],
 			"@semantic-release/github",
-			["@semantic-release/git", {
-				"assets": ["package.json", "CHANGELOG.md"],
-				"message": "chore(release): ${nextRelease.version} [skip ci]"
-			}]
+			[
+				"@semantic-release/git",
+				{
+					"assets": [
+						"package.json",
+						"CHANGELOG.md"
+					],
+					"message": "chore(release): ${nextRelease.version} [skip ci]"
+				}
+			]
 		]
 	}
 }
