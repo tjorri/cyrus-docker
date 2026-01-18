@@ -1,0 +1,14 @@
+# 1.0.0 (2026-01-18)
+
+
+### Bug Fixes
+
+* upgrade @semantic-release/npm for OIDC support ([791e4b6](https://github.com/tjorri/cyrus-docker/commit/791e4b6ea7856a47969d392c4007c37ee774bccd))
+* use test:run in CI to allow no test files ([c11b076](https://github.com/tjorri/cyrus-docker/commit/c11b076c600ee841ce3563ad91eab5179e2e5cc6))
+
+
+### Features
+
+* initial version of cyrus-docker CLI tool ([e7d441d](https://github.com/tjorri/cyrus-docker/commit/e7d441d5c08ea4abc5405aaf56457b2e1d4d61e5))
+* show Docker image status in status command ([2a46b94](https://github.com/tjorri/cyrus-docker/commit/2a46b94f32a9352fbcc1751d156395acd1a0a51f))
+* use npm trusted publishing with OIDC instead of tokens ([425807c](https://github.com/tjorri/cyrus-docker/commit/425807c3b609381e8456057c57a541ee3f4b3352))
