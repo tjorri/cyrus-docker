@@ -1,3 +1,4 @@
+import { ToolConfigService } from "../services/ToolConfigService.js";
 import { BaseCommand } from "./ICommand.js";
 
 /**
@@ -12,6 +13,11 @@ export class StatusCommand extends BaseCommand {
 
 		// Get tunnel status
 		const tunnelStatus = await this.app.tunnel.getStatus();
+
+		// Get image status
+		const toolConfigService = new ToolConfigService(this.logger);
+		const currentToolsHash = toolConfigService.getConfigHash();
+		const imageStatus = await this.app.docker.checkImageStatus(currentToolsHash);
 
 		// Get state info
 		const stateInfo = this.app.state.get();
@@ -57,6 +63,22 @@ export class StatusCommand extends BaseCommand {
 			this.logger.keyValue("  Local", `localhost:3456`);
 		} else {
 			this.logger.status("Tunnel", false, "Not running");
+		}
+
+		this.logger.blank();
+
+		// Image status
+		const imageExists = await this.app.docker.imageExists();
+		if (imageExists) {
+			this.logger.status("Image", !imageStatus.needsRebuild, imageStatus.reason);
+			if (currentToolsHash) {
+				this.logger.keyValue("  Tools hash", currentToolsHash);
+			}
+		} else {
+			this.logger.status("Image", false, "Not built");
+			if (currentToolsHash) {
+				this.logger.keyValue("  Tools hash", currentToolsHash);
+			}
 		}
 
 		// If both are running, show Linear configuration
