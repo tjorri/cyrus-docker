@@ -31,8 +31,8 @@ services:
       # Cyrus data directory (config, state, logs, repos)
       - ${CYRUS_HOME:-~/.cyrus}:/root/.cyrus:rw
 
-      # SSH keys for git operations (read-only for security)
-      - ~/.ssh:/root/.ssh:ro
+      # SSH keys for git operations (mounted to staging dir, entrypoint sets up /root/.ssh)
+      - ~/.ssh:/root/.ssh-host:ro
 
       # Note: Git config is set via GIT_USER_NAME and GIT_USER_EMAIL env vars
       # instead of mounting ~/.gitconfig (which conflicts with entrypoint writes)

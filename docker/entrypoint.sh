@@ -73,7 +73,7 @@ fi
 # but inside the container ~/.cyrus is mounted at /root/.cyrus.
 # This symlink makes host paths resolve correctly without modifying config.
 if [ -n "$CYRUS_HOST_PATH" ] && [ "$CYRUS_HOST_PATH" != "/root/.cyrus" ]; then
-    log_info "Setting up path compatibility symlink..."
+    log_info "Setting up path compatibility symlinks..."
 
     HOST_PARENT_DIR=$(dirname "$CYRUS_HOST_PATH")
 
@@ -81,11 +81,21 @@ if [ -n "$CYRUS_HOST_PATH" ] && [ "$CYRUS_HOST_PATH" != "/root/.cyrus" ]; then
         mkdir -p "$HOST_PARENT_DIR"
     fi
 
+    # Symlink for .cyrus directory
     if [ ! -e "$CYRUS_HOST_PATH" ]; then
         ln -s /root/.cyrus "$CYRUS_HOST_PATH"
         log_success "Created symlink: $CYRUS_HOST_PATH -> /root/.cyrus"
     elif [ -L "$CYRUS_HOST_PATH" ]; then
         log_info "Symlink already exists: $CYRUS_HOST_PATH"
+    fi
+
+    # Symlink for .ssh directory (SSH configs often have absolute IdentityFile paths)
+    HOST_SSH_PATH="$HOST_PARENT_DIR/.ssh"
+    if [ ! -e "$HOST_SSH_PATH" ]; then
+        ln -s /root/.ssh "$HOST_SSH_PATH"
+        log_success "Created symlink: $HOST_SSH_PATH -> /root/.ssh"
+    elif [ -L "$HOST_SSH_PATH" ]; then
+        log_info "Symlink already exists: $HOST_SSH_PATH"
     fi
 fi
 
@@ -115,15 +125,53 @@ git config --global init.defaultBranch main
 # -----------------------------------------------------------------------------
 # 4. Setup SSH keys (if mounted)
 # -----------------------------------------------------------------------------
-if [ -d "/root/.ssh" ] && [ -n "$(ls -A /root/.ssh 2>/dev/null)" ]; then
+# SSH is mounted to /root/.ssh-host (read-only) to allow creating a compatible config.
+# macOS SSH configs often contain options like UseKeychain that Linux doesn't support.
+if [ -d "/root/.ssh-host" ] && [ -n "$(ls -A /root/.ssh-host 2>/dev/null)" ]; then
     log_info "SSH directory detected, configuring..."
 
-    # Fix permissions (mounted volumes may have wrong perms)
-    chmod 700 /root/.ssh 2>/dev/null || true
-    chmod 600 /root/.ssh/* 2>/dev/null || true
-    chmod 644 /root/.ssh/*.pub 2>/dev/null || true
-    chmod 644 /root/.ssh/known_hosts 2>/dev/null || true
-    chmod 644 /root/.ssh/config 2>/dev/null || true
+    # Create the actual .ssh directory
+    mkdir -p /root/.ssh
+    chmod 700 /root/.ssh
+
+    # Symlink key files (not config or known_hosts, we handle those specially)
+    for file in /root/.ssh-host/*; do
+        filename=$(basename "$file")
+        case "$filename" in
+            config|known_hosts)
+                # Handle these separately
+                ;;
+            *)
+                # Symlink everything else (keys, etc.)
+                if [ ! -e "/root/.ssh/$filename" ]; then
+                    ln -s "$file" "/root/.ssh/$filename"
+                fi
+                ;;
+        esac
+    done
+
+    # Create a config that ignores macOS-specific options and includes the original
+    if [ -f "/root/.ssh-host/config" ]; then
+        cat > /root/.ssh/config << 'SSHCONFIG'
+# Auto-generated SSH config for Linux compatibility
+# Ignores macOS-specific options like UseKeychain, AddKeysToAgent
+IgnoreUnknown UseKeychain,AddKeysToAgent
+
+# Include the original config
+Include /root/.ssh-host/config
+SSHCONFIG
+        chmod 644 /root/.ssh/config
+        log_success "Created SSH config with macOS compatibility"
+    fi
+
+    # Copy known_hosts if it exists, or create with common hosts
+    if [ -f "/root/.ssh-host/known_hosts" ]; then
+        cp /root/.ssh-host/known_hosts /root/.ssh/known_hosts
+        chmod 644 /root/.ssh/known_hosts
+    else
+        ssh-keyscan github.com gitlab.com bitbucket.org >> /root/.ssh/known_hosts 2>/dev/null || true
+        log_success "Added common git hosts to known_hosts"
+    fi
 
     # Start ssh-agent if not running
     if [ -z "$SSH_AUTH_SOCK" ]; then
@@ -136,13 +184,6 @@ if [ -d "/root/.ssh" ] && [ -n "$(ls -A /root/.ssh 2>/dev/null)" ]; then
             fi
         done
         log_success "SSH agent started and keys loaded"
-    fi
-
-    # Add common hosts to known_hosts if not present
-    if [ ! -f "/root/.ssh/known_hosts" ]; then
-        mkdir -p /root/.ssh
-        ssh-keyscan github.com gitlab.com bitbucket.org >> /root/.ssh/known_hosts 2>/dev/null || true
-        log_success "Added common git hosts to known_hosts"
     fi
 else
     log_info "No SSH keys mounted (git will use HTTPS)"
