@@ -1,7 +1,21 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { CONFIG_DIR, STATE_FILE, STATE_VERSION } from "../config/constants.js";
+import {
+	CONFIG_DIR,
+	STATE_FILE,
+	STATE_VERSION,
+} from "../config/constants.js";
 import type { DockerCLIState } from "../config/types.js";
 import type { Logger } from "./Logger.js";
+
+/**
+ * Options for StateService
+ */
+export interface StateServiceOptions {
+	/** Directory for config files (defaults to ~/.cyrus-docker) */
+	configDir?: string;
+	/** Path to state file (defaults to ~/.cyrus-docker/state.json) */
+	stateFile?: string;
+}
 
 /**
  * Manages persistent state for cyrus-docker CLI
@@ -9,8 +23,15 @@ import type { Logger } from "./Logger.js";
  */
 export class StateService {
 	private state: DockerCLIState;
+	private readonly configDir: string;
+	private readonly stateFile: string;
 
-	constructor(private logger: Logger) {
+	constructor(
+		private logger: Logger,
+		options: StateServiceOptions = {},
+	) {
+		this.configDir = options.configDir ?? CONFIG_DIR;
+		this.stateFile = options.stateFile ?? STATE_FILE;
 		this.state = this.load();
 	}
 
@@ -19,10 +40,10 @@ export class StateService {
 	 */
 	private load(): DockerCLIState {
 		try {
-			if (existsSync(STATE_FILE)) {
-				const content = readFileSync(STATE_FILE, "utf-8");
+			if (existsSync(this.stateFile)) {
+				const content = readFileSync(this.stateFile, "utf-8");
 				const parsed = JSON.parse(content) as DockerCLIState;
-				this.logger.debug(`Loaded state from ${STATE_FILE}`);
+				this.logger.debug(`Loaded state from ${this.stateFile}`);
 				return parsed;
 			}
 		} catch (error) {
@@ -48,12 +69,16 @@ export class StateService {
 	save(): void {
 		try {
 			// Ensure config directory exists
-			if (!existsSync(CONFIG_DIR)) {
-				mkdirSync(CONFIG_DIR, { recursive: true });
+			if (!existsSync(this.configDir)) {
+				mkdirSync(this.configDir, { recursive: true });
 			}
 
-			writeFileSync(STATE_FILE, JSON.stringify(this.state, null, 2), "utf-8");
-			this.logger.debug(`Saved state to ${STATE_FILE}`);
+			writeFileSync(
+				this.stateFile,
+				JSON.stringify(this.state, null, 2),
+				"utf-8",
+			);
+			this.logger.debug(`Saved state to ${this.stateFile}`);
 		} catch (error) {
 			this.logger.error(`Failed to save state: ${error}`);
 		}
@@ -147,6 +172,6 @@ export class StateService {
 	 * Get the config directory path
 	 */
 	getConfigDir(): string {
-		return CONFIG_DIR;
+		return this.configDir;
 	}
 }
