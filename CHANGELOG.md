@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/tjorri/cyrus-docker/compare/v1.0.0...v1.0.1) (2026-01-25)
+
+
+### Bug Fixes
+
+* resolve container path mismatch for cyrus config paths ([200fc54](https://github.com/tjorri/cyrus-docker/commit/200fc544bc03cf822e527c0a6f078b261bad2b84))
+
 # 1.0.0 (2026-01-18)
 
 
