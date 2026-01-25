@@ -1,5 +1,9 @@
 # cyrus-docker
 
+[![npm version](https://img.shields.io/npm/v/cyrus-docker)](https://www.npmjs.com/package/cyrus-docker)
+[![CI](https://github.com/tjorri/cyrus-docker/actions/workflows/ci.yml/badge.svg)](https://github.com/tjorri/cyrus-docker/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+
 A CLI tool for managing Docker-based [Cyrus](https://github.com/ceedaragents/cyrus) deployments with automatic ngrok tunnel management.
 
 Cyrus is an AI agent that integrates Linear's issue tracking with Claude Code to automate software development tasks. This tool simplifies running Cyrus in a Docker container with all the necessary infrastructure.
