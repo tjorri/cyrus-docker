@@ -1,3 +1,5 @@
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { DEFAULT_PORT } from "../config/constants.js";
 import type { StartOptions } from "../config/types.js";
 import { ToolConfigService } from "../services/ToolConfigService.js";
@@ -65,6 +67,10 @@ export class StartCommand extends BaseCommand {
 		this.logger.info("Step 2: Updating CYRUS_BASE_URL...");
 		this.app.docker.updateEnvValue("CYRUS_BASE_URL", tunnelUrl);
 		this.logger.success(`Set CYRUS_BASE_URL=${tunnelUrl}`);
+
+		// Set host path for container symlink compatibility
+		const cyrusHostPath = process.env.CYRUS_HOME || join(homedir(), ".cyrus");
+		this.app.docker.updateEnvValue("CYRUS_HOST_PATH", cyrusHostPath);
 
 		// Step 3: Build and start Docker container
 		this.logger.blank();

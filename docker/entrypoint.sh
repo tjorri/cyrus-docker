@@ -3,10 +3,11 @@
 #
 # This script prepares the container environment before starting Cyrus:
 # 1. Validates required environment variables
-# 2. Configures git identity and safe directories
-# 3. Sets up SSH keys if mounted
-# 4. Authenticates GitHub CLI if token provided
-# 5. Writes ~/.cyrus/.env from environment variables
+# 2. Creates symlink for host path compatibility
+# 3. Configures git identity and safe directories
+# 4. Sets up SSH keys if mounted
+# 5. Authenticates GitHub CLI if token provided
+# 6. Writes ~/.cyrus/.env from environment variables
 #
 # Exit on error
 set -e
@@ -66,7 +67,30 @@ if [ "$LINEAR_DIRECT_WEBHOOKS" = "true" ]; then
 fi
 
 # -----------------------------------------------------------------------------
-# 2. Configure git
+# 2. Create symlink for host path compatibility
+# -----------------------------------------------------------------------------
+# Cyrus config.json stores absolute host paths (e.g., /Users/ttj/.cyrus/repos/infra)
+# but inside the container ~/.cyrus is mounted at /root/.cyrus.
+# This symlink makes host paths resolve correctly without modifying config.
+if [ -n "$CYRUS_HOST_PATH" ] && [ "$CYRUS_HOST_PATH" != "/root/.cyrus" ]; then
+    log_info "Setting up path compatibility symlink..."
+
+    HOST_PARENT_DIR=$(dirname "$CYRUS_HOST_PATH")
+
+    if [ ! -d "$HOST_PARENT_DIR" ]; then
+        mkdir -p "$HOST_PARENT_DIR"
+    fi
+
+    if [ ! -e "$CYRUS_HOST_PATH" ]; then
+        ln -s /root/.cyrus "$CYRUS_HOST_PATH"
+        log_success "Created symlink: $CYRUS_HOST_PATH -> /root/.cyrus"
+    elif [ -L "$CYRUS_HOST_PATH" ]; then
+        log_info "Symlink already exists: $CYRUS_HOST_PATH"
+    fi
+fi
+
+# -----------------------------------------------------------------------------
+# 3. Configure git
 # -----------------------------------------------------------------------------
 log_info "Configuring git..."
 
@@ -89,7 +113,7 @@ log_success "Configured git safe.directory for all paths"
 git config --global init.defaultBranch main
 
 # -----------------------------------------------------------------------------
-# 3. Setup SSH keys (if mounted)
+# 4. Setup SSH keys (if mounted)
 # -----------------------------------------------------------------------------
 if [ -d "/root/.ssh" ] && [ -n "$(ls -A /root/.ssh 2>/dev/null)" ]; then
     log_info "SSH directory detected, configuring..."
@@ -125,7 +149,7 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# 4. Verify GitHub CLI authentication (if token provided)
+# 5. Verify GitHub CLI authentication (if token provided)
 # -----------------------------------------------------------------------------
 if [ -n "$GITHUB_TOKEN" ]; then
     log_info "Verifying GitHub CLI authentication..."
@@ -140,7 +164,7 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# 5. Write ~/.cyrus/.env from environment variables
+# 6. Write ~/.cyrus/.env from environment variables
 # -----------------------------------------------------------------------------
 log_info "Writing Cyrus environment file..."
 
@@ -188,7 +212,7 @@ chmod 600 "$CYRUS_ENV_FILE"
 log_success "Cyrus environment file written: $CYRUS_ENV_FILE"
 
 # -----------------------------------------------------------------------------
-# 6. Display status
+# 7. Display status
 # -----------------------------------------------------------------------------
 echo ""
 log_info "=== Container Ready ==="

@@ -44,6 +44,8 @@ export interface EnvConfig {
 	GITHUB_TOKEN?: string;
 	/** Cyrus server port */
 	CYRUS_SERVER_PORT?: string;
+	/** Host path to cyrus home directory (for container symlink) */
+	CYRUS_HOST_PATH?: string;
 }
 
 /**
