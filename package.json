@@ -1,6 +1,6 @@
 {
 	"name": "cyrus-docker",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"description": "CLI tool for managing Docker-based Cyrus deployments with automatic tunnel management",
 	"main": "dist/app.js",
 	"types": "dist/app.d.ts",

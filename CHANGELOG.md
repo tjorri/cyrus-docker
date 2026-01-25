@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/tjorri/cyrus-docker/compare/v1.0.1...v1.1.0) (2026-01-25)
+
+
+### Features
+
+* add --no-cache support for force rebuilds ([beb003c](https://github.com/tjorri/cyrus-docker/commit/beb003c602c36da017a7c6829245b98ef4ece076))
+
 ## [1.0.1](https://github.com/tjorri/cyrus-docker/compare/v1.0.0...v1.0.1) (2026-01-25)
 
 
