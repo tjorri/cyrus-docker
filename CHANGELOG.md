@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/tjorri/cyrus-docker/compare/v1.2.0...v1.2.1) (2026-01-25)
+
+
+### Bug Fixes
+
+* handle macOS SSH config in Linux container ([48a2fdb](https://github.com/tjorri/cyrus-docker/commit/48a2fdbc604702a24c63c2322c6946680a100a27))
+
 # [1.2.0](https://github.com/tjorri/cyrus-docker/compare/v1.1.0...v1.2.0) (2026-01-25)
 
 
