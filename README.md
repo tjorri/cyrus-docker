@@ -8,7 +8,7 @@ Cyrus is an AI agent that integrates Linear's issue tracking with Claude Code to
 
 - [Docker](https://docs.docker.com/get-docker/) (with Docker Compose)
 - [ngrok](https://ngrok.com/download) (for exposing Cyrus to Linear webhooks)
-- [Node.js](https://nodejs.org/) 18+
+- [Node.js](https://nodejs.org/) 22+
 
 ## Installation
 
@@ -53,6 +53,7 @@ cyrus-docker add-repo https://github.com/your/repo.git
 | `cyrus-docker init` | Interactive setup wizard for credentials |
 | `cyrus-docker start [-d] [-b]` | Start ngrok tunnel and Docker container |
 | `cyrus-docker stop` | Stop container and tunnel |
+| `cyrus-docker restart` | Restart only the container (keeps ngrok tunnel) |
 | `cyrus-docker status` | Show container and tunnel status |
 | `cyrus-docker logs [-f]` | Show container logs (`-f` to follow) |
 | `cyrus-docker shell` | Open bash shell in the container |

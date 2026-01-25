@@ -10,6 +10,7 @@ import { AuthCommand } from "./commands/AuthCommand.js";
 import { BuildCommand } from "./commands/BuildCommand.js";
 import { InitCommand } from "./commands/InitCommand.js";
 import { LogsCommand } from "./commands/LogsCommand.js";
+import { RestartCommand } from "./commands/RestartCommand.js";
 import { ShellCommand } from "./commands/ShellCommand.js";
 import { StartCommand } from "./commands/StartCommand.js";
 import { StatusCommand } from "./commands/StatusCommand.js";
@@ -61,6 +62,15 @@ program
 	.action(async () => {
 		const app = new Application(packageJson.version);
 		await new StopCommand(app).execute();
+	});
+
+// restart - Restart only the Docker container (keeps ngrok tunnel)
+program
+	.command("restart")
+	.description("Restart only the Docker container (keeps ngrok tunnel running)")
+	.action(async () => {
+		const app = new Application(packageJson.version);
+		await new RestartCommand(app).execute();
 	});
 
 // status - Show container and tunnel status
