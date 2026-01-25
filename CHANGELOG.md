@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/tjorri/cyrus-docker/compare/v1.1.0...v1.2.0) (2026-01-25)
+
+
+### Features
+
+* add restart command to restart container without ngrok ([06667d6](https://github.com/tjorri/cyrus-docker/commit/06667d6b26cb290ca651d2661ef338a49849a34e))
+
 # [1.1.0](https://github.com/tjorri/cyrus-docker/compare/v1.0.1...v1.1.0) (2026-01-25)
 
 
