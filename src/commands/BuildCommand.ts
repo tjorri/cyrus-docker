@@ -49,6 +49,9 @@ export class BuildCommand extends BaseCommand {
 
 		this.logger.blank();
 
+		// When --force flag is used, do a full rebuild with no cache
+		const buildOptions = { noCache: this.options.force };
+
 		// Build with tools if configured
 		if (toolConfig) {
 			const resolvedConfig = toolConfigService.resolveConfig(toolConfig);
@@ -57,6 +60,7 @@ export class BuildCommand extends BaseCommand {
 					resolvedConfig,
 					toolConfigService.generateDockerfile.bind(toolConfigService),
 					toolsHash,
+					buildOptions,
 				);
 				this.printSuccess(toolsHash);
 				return;
@@ -64,7 +68,7 @@ export class BuildCommand extends BaseCommand {
 		}
 
 		// No tools config or empty config - build normally
-		await this.app.docker.build();
+		await this.app.docker.build(buildOptions);
 		this.printSuccess(null);
 	}
 

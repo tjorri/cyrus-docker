@@ -86,9 +86,13 @@ export class DockerService {
 	/**
 	 * Build the Docker image
 	 */
-	async build(): Promise<void> {
+	async build(options: { noCache?: boolean } = {}): Promise<void> {
 		this.logger.info("Building Docker image...");
-		await execa("docker", ["compose", "build"], this.getExecaOptions());
+		const args = ["compose", "build"];
+		if (options.noCache) {
+			args.push("--no-cache");
+		}
+		await execa("docker", args, this.getExecaOptions());
 		this.logger.success("Docker image built");
 	}
 
@@ -99,14 +103,19 @@ export class DockerService {
 		toolConfig: ResolvedToolConfig,
 		generateDockerfile: (config: ResolvedToolConfig, baseImage: string) => string,
 		toolsHash?: string | null,
+		options: { noCache?: boolean } = {},
 	): Promise<void> {
 		this.logger.info("Building custom Docker image with tools...");
 
 		// Build base image first
 		this.logger.info("Building base image...");
+		const baseArgs = ["compose", "build"];
+		if (options.noCache) {
+			baseArgs.push("--no-cache");
+		}
 		await execa(
 			"docker",
-			["compose", "build"],
+			baseArgs,
 			this.getExecaOptions(),
 		);
 
@@ -135,6 +144,9 @@ export class DockerService {
 			"-f", customDockerfilePath,
 			"-t", `${IMAGE_NAME}:latest`,
 		];
+		if (options.noCache) {
+			buildArgs.push("--no-cache");
+		}
 		if (toolsHash) {
 			buildArgs.push("--label", `${TOOLS_HASH_LABEL}=${toolsHash}`);
 		}

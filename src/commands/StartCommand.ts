@@ -163,6 +163,9 @@ export class StartCommand extends BaseCommand {
 			this.logger.info("Force rebuild requested...");
 		}
 
+		// When --build flag is used, do a full rebuild with no cache
+		const buildOptions = { noCache: this.options.build };
+
 		// Build with tools if configured
 		if (toolConfig) {
 			const resolvedConfig = toolConfigService.resolveConfig(toolConfig);
@@ -171,12 +174,13 @@ export class StartCommand extends BaseCommand {
 					resolvedConfig,
 					toolConfigService.generateDockerfile.bind(toolConfigService),
 					toolsHash,
+					buildOptions,
 				);
 				return;
 			}
 		}
 
 		// No tools config or empty config - build normally
-		await this.app.docker.build();
+		await this.app.docker.build(buildOptions);
 	}
 }
